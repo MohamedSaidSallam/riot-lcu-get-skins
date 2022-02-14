@@ -1,9 +1,18 @@
-import json
-import sys
+import argparse
 import codecs
+import json
 from os import walk
 
-PLAYERS_FOLDER = 'players'
+parser = argparse.ArgumentParser(
+    description='Searches the skins json files in the players folder for a given string')
+parser.add_argument('searchString', nargs='+',
+                    help='the string to search for in the skins json (using .contains())')
+parser.add_argument('--players-folder', nargs='*', default=['players'],
+                    help='the folder that contains the skins json files')
+
+args = vars(parser.parse_args())
+
+PLAYERS_FOLDER = ' '.join(args['players_folder'])
 
 filenames = next(walk(PLAYERS_FOLDER), (None, None, []))[2]
 
@@ -24,7 +33,7 @@ for filename in filenames:
 
     players[filename[:-len('.json')]] = jsonData
 
-SEARCH_STRING = ' '.join(sys.argv[1:]).lower()
+SEARCH_STRING = ' '.join(args['searchString']).lower()
 
 filteredSkinsPerPlayer = {playerName: [] for playerName in players}
 
