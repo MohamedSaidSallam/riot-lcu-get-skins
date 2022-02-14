@@ -16,35 +16,41 @@ PLAYERS_FOLDER = ' '.join(args['players_folder'])
 
 filenames = next(walk(PLAYERS_FOLDER), (None, None, []))[2]
 
+LOOT_EXT = '.loot'
+
 players = {}
+playersLoot = {}
 for filename in filenames:
     if not filename.endswith('.json'):
         continue
 
-    jsonData = None
-
-    filePath = PLAYERS_FOLDER + '/' + filename
-    try:
-        with open(filePath, 'r') as inputFile:
-            jsonData = json.load(inputFile)
-    except:
-        with codecs.open(filePath, 'r', encoding='utf-8-sig') as inputFile:
-            jsonData = json.load(inputFile)
-
-    players[filename[:-len('.json')]] = jsonData
+    with codecs.open(PLAYERS_FOLDER + '/' + filename, 'r', encoding='utf-8-sig') as inputFile:
+        jsonData = json.load(inputFile)
+        fileNameWithoutExt = filename[:-len('.json')]
+        if fileNameWithoutExt.endswith(LOOT_EXT):
+            playersLoot[fileNameWithoutExt[:-len(LOOT_EXT)]] = jsonData
+        else:
+            players[fileNameWithoutExt] = jsonData
 
 SEARCH_STRING = ' '.join(args['searchString']).lower()
 
 filteredSkinsPerPlayer = {playerName: [] for playerName in players}
 
+
+def doesSkinMatchSearch(skinName):
+    return SEARCH_STRING in skinName.lower()
+
+
 for playerKey, skins in players.items():
-    isLoot = playerKey.endswith('.loot')
-    nameKey = 'itemDesc' if isLoot else 'name'
     for skin in skins:
-        isSkinAvailable = skin['displayCategories'] == 'SKIN' if isLoot else isLoot and skin['ownership']['owned']
-        matchesSearch = SEARCH_STRING in skin[nameKey].lower()
-        if (isSkinAvailable) and matchesSearch:
-            filteredSkinsPerPlayer[playerKey].append(skin[nameKey])
+        if skin['ownership']['owned'] and doesSkinMatchSearch(skin['name']):
+            filteredSkinsPerPlayer[playerKey].append(skin['name'])
+
+for playerKey, skins in playersLoot.items():
+    nameKey = 'itemDesc'
+    for skin in skins:
+        if skin['displayCategories'] == 'SKIN' and doesSkinMatchSearch(skin[nameKey]):
+            filteredSkinsPerPlayer[playerKey].append(skin[nameKey] + ' (loot)')
 
 for playerName, playerSkins in filteredSkinsPerPlayer.items():
     print(playerName)
