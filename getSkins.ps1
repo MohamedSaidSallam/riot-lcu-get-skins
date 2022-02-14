@@ -7,5 +7,3 @@ $summonerId = (curl.exe --insecure -H "Accept: application/json" -u riot:$token 
 $PSDefaultParameterValues['Out-File:Encoding'] = 'utf8'
 curl.exe --insecure -H "Accept: application/json" -u riot:$token https://127.0.0.1:$port/lol-champions/v1/inventories/$summonerId/skins-minimal > skins.json
 curl.exe --insecure -H "Accept: application/json" -u riot:$token https://127.0.0.1:$port/lol-loot/v1/player-loot > skinsLoot.json
-
-curl.exe --insecure -H "Accept: application/json" -u riot:$token https://127.0.0.1:$port/lol-champions/v1/inventories/$summonerId/champions > champs.json
